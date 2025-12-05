@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {% block title %}
+      <title>Local Library</title>
+    {% endblock %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap 3.3.7 (можно обновить, но в учебных проектах часто оставляют так) -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- Подключение собственного CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Левая панель: навигация -->
+        <div class="col-sm-2">
+          {% block sidebar %}
+            <ul class="list-unstyled sidebar-nav" style="margin-top: 20px;">
+              {% if user.is_authenticated %}
+                <li><strong>User:</strong> {{ user.get_username }}</li>
+                <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
+                {% if perms.catalog.can_mark_returned %}
+                  <li><a href="{% url 'all-borrowed' %}">All Borrowed</a></li>
+                {% endif %}
+                <li>
+                  <!-- Форма выхода (POST) -->
+                  <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="
+                      background: none;
+                      border: none;
+                      padding: 0;
+                      color: #337ab7;
+                      text-decoration: underline;
+                      cursor: pointer;
+                      font-size: 14px;
+                      text-align: left;
+                    ">Logout</button>
+                  </form>
+                </li>
+              {% else %}
+                <li><a href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
+              {% endif %}
+              <li><a href="{% url 'index' %}">Home</a></li>
+              <li><a href="{% url 'books' %}">All Books</a></li>
+              <li><a href="{% url 'authors' %}">All Authors</a></li>
+            </ul>
+          {% endblock %}
+        </div>
+
+        <!-- Основной контент -->
+        <div class="col-sm-10">
+          {% block content %}
+            <!-- Контент будет вставлен из дочерних шаблонов -->
+          {% endblock %}
+        </div>
+      </div>
+
+      <!-- Пагинация (обычно внизу) -->
+      {% block pagination %}
+        {% if is_paginated %}
+          <div class="pagination" style="margin-top: 20px; margin-left: 15px;">
+            <span class="page-links">
+              {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">&laquo; previous</a>
+              {% endif %}
+
+              <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </span>
+
+              {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next &raquo;</a>
+              {% endif %}
+            </span>
+          </div>
+        {% endif %}
+      {% endblock %}
+    </div>
+  </body>
+</html>
+

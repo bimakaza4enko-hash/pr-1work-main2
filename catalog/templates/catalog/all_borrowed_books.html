@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Все выданные книги</h1>
+
+  {% if bookinstance_list %}
+    <ul>
+      {% for bookinst in bookinstance_list %}
+        <li>
+          <a href="{{ bookinst.book.get_absolute_url }}">{{ bookinst.book.title }}</a>
+          ({{ bookinst.due_back }}) — заемщик:
+          <strong>{{ bookinst.borrower.get_username }}</strong>
+            {% if perms.catalog.can_mark_returned %}
+            - <a href="{% url 'renew-book-librarian' bookinst.pk %}">Renew</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Нет выданных книг.</p>
+  {% endif %}
+{% endblock %}
